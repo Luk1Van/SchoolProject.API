@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using School.DataModel;
 using School.Services.Interfaces;
+using System.Data.SqlClient;
+using System.Reflection.Metadata;
 
 namespace School.Services
 {
@@ -17,12 +20,20 @@ namespace School.Services
 
         public IEnumerable<Student> Get()
         {
-            IEnumerable<Student> students = new List<Student>()
+            IEnumerable<Student> students = new List<Student>();
+            try
             {
-                new Student() {Id = 1, FirstName = "Ivan" , LastName = "L"},
-                new Student() {Id = 2, FirstName = "Mark" , LastName = "O"}
-            };
+                string query = "dbo.GetStudents";
+                using(var sqlConn = new SqlConnection(_connstring))
+                {
+                    students = sqlConn.Query<Student>(query, commandType: System.Data.CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception ex)
+            {
 
+                throw;
+            }
             return students;
         }
     }
